@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linkedin, Github, Twitter, Globe, Heart } from 'lucide-react';
+import { Linkedin, Github, Twitter, Globe, Heart, Youtube } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -11,15 +11,15 @@ const Footer: React.FC = () => {
                     <span className="font-bold text-white text-xs">M</span>
                  </div>
                  <p className="flex items-center gap-1">
-                     &copy; 2026 Développé avec <Heart size={14} className="text-pink-500 fill-pink-500" /> par Emmanuel Haouzi | M-coder
+                     &copy; 2026 Développé avec <Heart size={14} className="text-pink-500 fill-pink-500" /> par Ousseini KABORE | Le-Programmeur
                  </p>
             </div>
             
             <div className="flex gap-6">
-                <a href="#" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Linkedin size={22} /></a>
-                <a href="#" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Github size={22} /></a>
-                <a href="#" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Twitter size={22} /></a>
-                <a href="#" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Globe size={22} /></a>
+                <a target="_blank" href="https://www.linkedin.com/in/ousseini-kabor%C3%A9-7b4226155/" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Linkedin size={22} /></a>
+                <a target="_blank" href="https://github.com/Almighty2?tab=repositories" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Github size={22} /></a>
+                <a target="_blank" href="https://x.com/Almighty_Kabore" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Twitter size={22} /></a>
+                <a target="_blank" href="https://www.youtube.com/@ecole-du-programmeur" className="text-secondary hover:text-white transition-colors duration-300 transform hover:-translate-y-1"><Youtube size={22} /></a>
             </div>
         </div>
     </footer>

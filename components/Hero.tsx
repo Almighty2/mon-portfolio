@@ -23,7 +23,7 @@ const Hero: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="font-black text-white lg:text-[80px] sm:text-[60px] xs:text-[50px] text-[40px] lg:leading-[98px] mt-2"
           >
-            Je suis <span className="text-[#915eff]">Ousseini Kabore</span>
+            Je suis <span className="text-[#915eff]">Ousseini Kaboré</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}

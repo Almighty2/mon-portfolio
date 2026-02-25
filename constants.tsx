@@ -257,74 +257,66 @@ export const technologies: Technology[] = [
 
 export const projects: Project[] = [
   {
-    name: "ABMI engineering",
+    name: "Smart Contract d'Échange Crypto",
     description:
-      "Refonte du site d'ABMI Engineering, comprenant un grand nombre de pages en anglais et en français. Un système de design a été créé en se basant sur le site existant, puis migré vers Next.js et TypeScript.",
+      "Conception et développement d'un Smart Contract Solidity pour l'échange de cryptomonnaies (Swap/DEX). Le protocole permet des transactions décentralisées, transparentes et sécurisées entre utilisateurs via Web3.",
     tags: [
       {
-        name: "nextjs",
-        color: "text-blue-500",
+        name: "solidity",
+        color: "text-purple-500",
       },
-      {
-        name: "firebase",
-        color: "text-green-500",
-      },
-      {
-        name: "tailwind",
-        color: "text-pink-500",
-      },
-    ],
-    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=2944&auto=format&fit=crop", // Blog/Tech placeholder
-    source_code_link: "https://github.com/",
-  },
-  {
-    name: "Tomhe Torah",
-    description:
-      "Tomhe Torah est une plateforme de dons robuste développée avec Next.js, TypeScript et Firebase. Cette plateforme intègre des paiements Stripe pour assurer la sécurité des transactions et gère les reçus CERFA.",
-    tags: [
-      {
-        name: "nextjs",
-        color: "text-blue-500",
-      },
-      {
-        name: "firebase",
-        color: "text-green-500",
-      },
-      {
-        name: "stripe",
-        color: "text-pink-500",
-      },
-       {
-        name: "node",
-        color: "text-orange-500",
-      },
-    ],
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=2940&auto=format&fit=crop", // Payment/Donation placeholder
-    source_code_link: "https://github.com/",
-  },
-  {
-    name: "MEEM",
-    description:
-      "Meem est une plateforme de messagerie en temps réel innovante, élaborée avec JavaScript, Bootstrap, Firebase et WebSockets. Clone de WhatsApp, elle permet des échanges instantanés et sécurisés.",
-    tags: [
       {
         name: "react",
         color: "text-blue-500",
       },
       {
-        name: "firebase",
+        name: "web3.js",
         color: "text-green-500",
       },
+    ],
+    image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=2800&auto=format&fit=crop", // Bitcoin/Crypto Trading representation
+    source_code_link: "https://github.com/",
+  },
+  {
+    name: "Application Cotation MRH",
+    description:
+      "Développement d'une application d’Assurance Multirisque Habitation (MRH). Permet la simulation, la cotation et la souscription rapide avec une architecture robuste assurant la sécurité des données clients.",
+    tags: [
       {
-        name: "bootstrap",
-        color: "text-pink-500",
+        name: "nestjs",
+        color: "text-red-500",
       },
-       {
-        name: "socket.io",
-        color: "text-orange-500",
+      {
+        name: "angular",
+        color: "text-red-600",
+      },
+      {
+        name: "postgresql",
+        color: "text-blue-500",
       },
     ],
-    image: "https://images.unsplash.com/photo-1611746872915-64382b5c76da?q=80&w=2940&auto=format&fit=crop", // Messaging/Chat placeholder
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2873&auto=format&fit=crop", // House/Property placeholder
+    source_code_link: "https://github.com/",
+  },
+  {
+    name: "Assurances des bœufs attelés",
+    description:
+      "Création d'une plateforme métier spécialisée pour la gestion et la cotation de polices d'assurance destinées au bétail (bœufs attelés), digitalisant un processus complexe pour le secteur agricole.",
+    tags: [
+      {
+        name: "php",
+        color: "text-indigo-400",
+      },
+      {
+        name: "mysql",
+        color: "text-blue-400",
+      },
+      {
+        name: "javascript",
+        color: "text-yellow-500",
+      },
+    ],
+    image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2944&auto=format&fit=crop", // Cattle/Farm placeholder
     source_code_link: "https://github.com/",
   },
 ];
@@ -332,26 +324,26 @@ export const projects: Project[] = [
 export const testimonials: Testimonial[] = [
   {
     testimonial:
-      "Je tiens à exprimer ma grande satisfaction concernant le travail réalisé par Emmanuel lors de la refactorisation complète de notre projet Gatsby.js...",
-    name: "Arnaud desportes",
-    designation: "CEO",
-    company: "Remote Monkey",
+      "Je tiens à exprimer ma grande satisfaction concernant le travail réalisé par Ousseini sur nos applications de cotation d'assurance. Son travail sur le back-end est irréprochable.",
+    name: "Direction Technique",
+    designation: "Manager",
+    company: "GNA-CI",
     image: "https://randomuser.me/api/portraits/men/5.jpg",
   },
   {
     testimonial:
-      "Je tiens à recommander chaleureusement Emmanuel, un développeur exceptionnel avec qui j'ai eu le plaisir de collaborer. Emmanuel possède une...",
-    name: "J.C Meilland",
-    designation: "CEO",
-    company: "FRENCH4 DEV",
+      "Le projet de diplôme en Master Blockchain d'Ousseini était particulièrement abouti. Ses connaissances en Solidity et en intégration Web3 sont excellentes.",
+    name: "Professeur Encadrant",
+    designation: "Enseignant Chercheur",
+    company: "UVCI",
     image: "https://randomuser.me/api/portraits/men/7.jpg",
   },
   {
     testimonial:
-      "Emmanuel a conçu une application pour notre entreprise qui englobe divers domaines de compétences, incluant le développement, le design, les bases de...",
-    name: "Naomi Saghroun",
-    designation: "CFO",
-    company: "Menouchat Chalom",
+      "Les tutoriels d'Ousseini sur la chaîne 'École du programmeur' m'ont énormément aidé à comprendre React et le développement web moderne. Un formateur très clair !",
+    name: "Abonné YouTube",
+    designation: "Apprenant",
+    company: "École du Programmeur",
     image: "https://randomuser.me/api/portraits/women/4.jpg",
   },
 ];
