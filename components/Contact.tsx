@@ -26,20 +26,74 @@ const TypingText: React.FC<{ text: string; delay?: number; className?: string }>
   return <span className={className}>{displayed}<span className="animate-pulse">|</span></span>;
 };
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface FormErrors {
+  name?: string;
+  email?: string;
+  message?: string;
+}
+
 const Contact: React.FC = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // ─── Validation ────────────────────────────────────────────────────────────
+  const validate = (values: typeof form): FormErrors => {
+    const errs: FormErrors = {};
+
+    if (!values.name.trim()) {
+      errs.name = "// error: senderName is required";
+    } else if (values.name.trim().length < 2) {
+      errs.name = "// error: senderName must be >= 2 chars";
+    }
+
+    if (!values.email.trim()) {
+      errs.email = "// error: senderEmail is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      errs.email = "// error: senderEmail format invalid";
+    }
+
+    if (!values.message.trim()) {
+      errs.message = "// error: messageBody is required";
+    } else if (values.message.trim().length < 10) {
+      errs.message = "// error: messageBody must be >= 10 chars";
+    }
+
+    return errs;
+  };
+
+  // Re-validate on every change (only show errors for touched fields)
+  useEffect(() => {
+    setErrors(validate(form));
+  }, [form]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleBlur = (name: string) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    setFocusedField(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Mark all fields as touched to show all errors
+    setTouched({ name: true, email: true, message: true });
+
+    const currentErrors = validate(form);
+    if (Object.keys(currentErrors).length > 0) {
+      setErrors(currentErrors);
+      return; // ← stop here if invalid
+    }
+
     setLoading(true);
 
     const sendEmail = (attempt = 1) => {
@@ -48,8 +102,8 @@ const Contact: React.FC = () => {
           "service_15n9djn",
           "template_3ko7k8c",
           {
-            name: form.name,        // ← correspond à {{name}}
-            message: form.message,  // ← correspond à {{message}}
+            name: form.name,
+            message: form.message,
             time: new Date().toLocaleString('fr-FR', {
               weekday: 'long',
               year: 'numeric',
@@ -57,8 +111,8 @@ const Contact: React.FC = () => {
               day: 'numeric',
               hour: '2-digit',
               minute: '2-digit',
-            }),                     // ← correspond à {{time}}
-            email: form.email,      // ← pour le Reply To
+            }),
+            email: form.email,
           },
           "WC4GN0j9pHZvd4YGZ"
         )
@@ -66,10 +120,11 @@ const Contact: React.FC = () => {
           setLoading(false);
           setSent(true);
           setForm({ name: "", email: "", message: "" });
-          setTimeout(() => setSent(false), 4000);
+          setTouched({});
+          setErrors({});
+          setTimeout(() => setSent(false), 2000);
         })
         .catch((error) => {
-          // Retry automatique 1 fois si erreur réseau
           if (attempt < 2 && error?.message?.includes('fetch')) {
             console.warn(`Tentative ${attempt} échouée, retry...`);
             setTimeout(() => sendEmail(attempt + 1), 2000);
@@ -84,10 +139,11 @@ const Contact: React.FC = () => {
     sendEmail();
   };
 
-  const fields = [
-    { name: "name", label: "name", type: "text", placeholder: "John Doe", varName: "string" },
-    { name: "email", label: "email", type: "email", placeholder: "john@example.com", varName: "string" },
-  ];
+  // Helper: show error only if field is touched
+  const getError = (field: keyof FormErrors) =>
+    touched[field] ? errors[field] : undefined;
+
+  const isFormValid = Object.keys(validate(form)).length === 0;
 
   return (
     <section
@@ -95,50 +151,38 @@ const Contact: React.FC = () => {
       className="sm:px-16 px-6 sm:py-16 py-10 max-w-7xl mx-auto relative z-0"
       style={{ fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace" }}
     >
-      {/* Google Font import via style tag */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
 
-        .scanline {
-          position: relative;
-        }
+        .scanline { position: relative; }
         .scanline::after {
           content: '';
           position: absolute;
           inset: 0;
           background: repeating-linear-gradient(
             0deg,
-            transparent,
-            transparent 2px,
-            rgba(0,255,128,0.015) 2px,
-            rgba(0,255,128,0.015) 4px
+            transparent, transparent 2px,
+            rgba(0,255,128,0.015) 2px, rgba(0,255,128,0.015) 4px
           );
           pointer-events: none;
           z-index: 10;
         }
 
-        .terminal-input {
-          caret-color: #00ff80;
-        }
-
+        .terminal-input { caret-color: #00ff80; }
         .terminal-input:focus {
           outline: none;
           box-shadow: 0 0 0 1px #00ff80, 0 0 20px rgba(0,255,128,0.15);
         }
-
-        .glow-green {
-          text-shadow: 0 0 10px rgba(0,255,128,0.6);
+        .terminal-input-error {
+          border-color: rgba(255, 80, 80, 0.6) !important;
+        }
+        .terminal-input-error:focus {
+          box-shadow: 0 0 0 1px rgba(255,80,80,0.8), 0 0 20px rgba(255,80,80,0.15) !important;
         }
 
-        .glow-yellow {
-          text-shadow: 0 0 10px rgba(255,200,0,0.6);
-        }
+        .glow-green { text-shadow: 0 0 10px rgba(0,255,128,0.6); }
 
-        .btn-terminal {
-          position: relative;
-          overflow: hidden;
-        }
-
+        .btn-terminal { position: relative; overflow: hidden; }
         .btn-terminal::before {
           content: '';
           position: absolute;
@@ -147,28 +191,26 @@ const Contact: React.FC = () => {
           background: linear-gradient(90deg, transparent, rgba(0,255,128,0.15), transparent);
           transition: left 0.4s ease;
         }
+        .btn-terminal:hover::before { left: 100%; }
+        .btn-terminal:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-terminal:disabled::before { display: none; }
 
-        .btn-terminal:hover::before {
-          left: 100%;
-        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes scroll-up { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+        .code-scroll { animation: scroll-up 20s linear infinite; }
 
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-4px); }
+          40% { transform: translateX(4px); }
+          60% { transform: translateX(-3px); }
+          80% { transform: translateX(3px); }
         }
-
-        @keyframes scroll-up {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-50%); }
-        }
-
-        .code-scroll {
-          animation: scroll-up 20s linear infinite;
-        }
+        .shake { animation: shake 0.35s ease; }
       `}</style>
 
       <div className="xl:mt-12 flex xl:flex-row flex-col-reverse gap-8 overflow-hidden">
-        
+
         {/* LEFT: Terminal Form */}
         <motion.div
           initial={{ x: -80, opacity: 0 }}
@@ -177,10 +219,9 @@ const Contact: React.FC = () => {
           transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
           className="flex-[0.75] relative"
         >
-          {/* Terminal window */}
           <div className="rounded-lg overflow-hidden border border-[#00ff80]/20 shadow-[0_0_60px_rgba(0,255,128,0.08)]">
-            
-            {/* Terminal title bar */}
+
+            {/* Title bar */}
             <div className="bg-[#0d1117] border-b border-[#00ff80]/15 px-4 py-3 flex items-center gap-3">
               <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
@@ -195,8 +236,7 @@ const Contact: React.FC = () => {
 
             {/* Terminal body */}
             <div className="bg-[#0d1117] p-6 relative scanline">
-              
-              {/* Comment header */}
+
               <div className="mb-6 text-sm leading-6">
                 <span className="text-[#6a9955]">// Initialize contact module</span><br />
                 <span className="text-[#569cd6]">import</span>
@@ -206,7 +246,6 @@ const Contact: React.FC = () => {
                 <span className="text-white">;</span>
               </div>
 
-              {/* Function signature */}
               <div className="mb-5 text-sm">
                 <span className="text-[#dcdcaa]">async function</span>
                 <span className="text-[#4ec9b0]"> contactMe</span>
@@ -217,9 +256,9 @@ const Contact: React.FC = () => {
                 <span className="text-white">) {"{"}</span>
               </div>
 
-              <form ref={formRef} onSubmit={handleSubmit} className="pl-4 space-y-5">
-                
-                {/* Name field */}
+              <form ref={formRef} onSubmit={handleSubmit} className="pl-4 space-y-5" noValidate>
+
+                {/* ── Name ── */}
                 <div>
                   <div className="text-sm mb-1 flex items-center gap-2">
                     <span className="text-[#c586c0]">const</span>
@@ -234,13 +273,22 @@ const Contact: React.FC = () => {
                     value={form.name}
                     onChange={handleChange}
                     onFocus={() => setFocusedField("name")}
-                    onBlur={() => setFocusedField(null)}
+                    onBlur={() => handleBlur("name")}
                     placeholder='"Votre nom..."'
-                    className="terminal-input w-full bg-[#111827] text-[#00ff80] placeholder-[#00ff80]/25 text-sm py-3 px-4 rounded border border-[#00ff80]/15 transition-all"
+                    className={`terminal-input w-full bg-[#111827] text-[#00ff80] placeholder-[#00ff80]/25 text-sm py-3 px-4 rounded border border-[#00ff80]/15 transition-all ${getError("name") ? "terminal-input-error" : ""}`}
                   />
+                  {getError("name") && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1.5 text-xs text-[#ff6060] font-mono"
+                    >
+                      {getError("name")}
+                    </motion.div>
+                  )}
                 </div>
 
-                {/* Email field */}
+                {/* ── Email ── */}
                 <div>
                   <div className="text-sm mb-1 flex items-center gap-2">
                     <span className="text-[#c586c0]">const</span>
@@ -255,13 +303,22 @@ const Contact: React.FC = () => {
                     value={form.email}
                     onChange={handleChange}
                     onFocus={() => setFocusedField("email")}
-                    onBlur={() => setFocusedField(null)}
+                    onBlur={() => handleBlur("email")}
                     placeholder='"votre@email.com"'
-                    className="terminal-input w-full bg-[#111827] text-[#00ff80] placeholder-[#00ff80]/25 text-sm py-3 px-4 rounded border border-[#00ff80]/15 transition-all"
+                    className={`terminal-input w-full bg-[#111827] text-[#00ff80] placeholder-[#00ff80]/25 text-sm py-3 px-4 rounded border border-[#00ff80]/15 transition-all ${getError("email") ? "terminal-input-error" : ""}`}
                   />
+                  {getError("email") && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1.5 text-xs text-[#ff6060] font-mono"
+                    >
+                      {getError("email")}
+                    </motion.div>
+                  )}
                 </div>
 
-                {/* Message field */}
+                {/* ── Message ── */}
                 <div>
                   <div className="text-sm mb-1 flex items-center gap-2">
                     <span className="text-[#c586c0]">const</span>
@@ -276,19 +333,29 @@ const Contact: React.FC = () => {
                     value={form.message}
                     onChange={handleChange}
                     onFocus={() => setFocusedField("message")}
-                    onBlur={() => setFocusedField(null)}
+                    onBlur={() => handleBlur("message")}
                     placeholder='"Décrivez votre projet..."'
-                    className="terminal-input w-full bg-[#111827] text-[#00ff80] placeholder-[#00ff80]/25 text-sm py-3 px-4 rounded border border-[#00ff80]/15 transition-all resize-none"
+                    className={`terminal-input w-full bg-[#111827] text-[#00ff80] placeholder-[#00ff80]/25 text-sm py-3 px-4 rounded border border-[#00ff80]/15 transition-all resize-none ${getError("message") ? "terminal-input-error" : ""}`}
                   />
+                  {getError("message") && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1.5 text-xs text-[#ff6060] font-mono"
+                    >
+                      {getError("message")}
+                    </motion.div>
+                  )}
                 </div>
 
-                {/* Return / submit */}
+                {/* Return */}
                 <div className="text-sm mb-1">
                   <span className="text-[#c586c0]">return</span>
                   <span className="text-[#dcdcaa]"> sendMessage</span>
                   <span className="text-white">({"{ senderName, senderEmail, messageBody }"});</span>
                 </div>
 
+                {/* Submit button */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -308,12 +375,11 @@ const Contact: React.FC = () => {
                     </>
                   )}
                 </button>
+
               </form>
 
-              {/* Closing brace */}
               <div className="mt-5 text-sm text-white">{"}"}</div>
 
-              {/* Prompt line */}
               <div className="mt-4 text-xs text-[#00ff80]/40 flex items-center gap-2">
                 <span>user@portfolio:~$</span>
                 <span className="w-2 h-4 bg-[#00ff80]/60" style={{ animation: 'blink 1s step-end infinite' }} />
@@ -330,7 +396,6 @@ const Contact: React.FC = () => {
           transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
           className="xl:flex-1 xl:h-auto md:h-[550px] h-[300px] flex flex-col gap-4"
         >
-          {/* Mini terminal output */}
           <div className="rounded-lg border border-[#00ff80]/20 bg-[#0d1117] overflow-hidden flex-1">
             <div className="bg-[#0d1117] border-b border-[#00ff80]/15 px-4 py-2 flex items-center gap-3">
               <div className="flex gap-2">
@@ -342,7 +407,6 @@ const Contact: React.FC = () => {
             </div>
 
             <div className="p-4 overflow-hidden h-full relative">
-              {/* Scrolling code output */}
               <div className="overflow-hidden" style={{ maxHeight: 'calc(100% - 20px)' }}>
                 <div className="code-scroll text-xs leading-6 text-[#00ff80]/70 space-y-0.5">
                   {[
@@ -375,18 +439,8 @@ const Contact: React.FC = () => {
                     { status: "info", text: "  Coverage: 94.3%" },
                   ].map((line, i) => (
                     <div key={i} className="flex gap-2">
-                      {line.prompt && (
-                        <>
-                          <span className="text-[#27c93f]">❯</span>
-                          <span className="text-white">{line.text}</span>
-                        </>
-                      )}
-                      {line.hash && (
-                        <>
-                          <span className="text-[#ffbd2e]">{line.hash}</span>
-                          <span className="text-[#00ff80]/60">{line.msg}</span>
-                        </>
-                      )}
+                      {line.prompt && (<><span className="text-[#27c93f]">❯</span><span className="text-white">{line.text}</span></>)}
+                      {line.hash && (<><span className="text-[#ffbd2e]">{line.hash}</span><span className="text-[#00ff80]/60">{line.msg}</span></>)}
                       {line.status === 'pass' && <span className="text-[#27c93f]">{line.text}</span>}
                       {line.status === 'info' && <span className="text-[#569cd6]">{line.text}</span>}
                     </div>
@@ -396,7 +450,6 @@ const Contact: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats bar */}
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: "commits", value: "1.2k", icon: "⎇" },
