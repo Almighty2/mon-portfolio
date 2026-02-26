@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import emailjs from '@emailjs/browser';
 
 // Terminal typing animation component
 const TypingText: React.FC<{ text: string; delay?: number; className?: string }> = ({ text, delay = 0, className = "" }) => {
@@ -40,12 +41,47 @@ const Contact: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSent(true);
-      setForm({ name: "", email: "", message: "" });
-      setTimeout(() => setSent(false), 4000);
-    }, 1500);
+
+    const sendEmail = (attempt = 1) => {
+      emailjs
+        .send(
+          "service_15n9djn",
+          "template_3ko7k8c",
+          {
+            name: form.name,        // ← correspond à {{name}}
+            message: form.message,  // ← correspond à {{message}}
+            time: new Date().toLocaleString('fr-FR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            }),                     // ← correspond à {{time}}
+            email: form.email,      // ← pour le Reply To
+          },
+          "WC4GN0j9pHZvd4YGZ"
+        )
+        .then(() => {
+          setLoading(false);
+          setSent(true);
+          setForm({ name: "", email: "", message: "" });
+          setTimeout(() => setSent(false), 4000);
+        })
+        .catch((error) => {
+          // Retry automatique 1 fois si erreur réseau
+          if (attempt < 2 && error?.message?.includes('fetch')) {
+            console.warn(`Tentative ${attempt} échouée, retry...`);
+            setTimeout(() => sendEmail(attempt + 1), 2000);
+          } else {
+            setLoading(false);
+            console.error('EmailJS error:', error);
+            alert("Erreur réseau. Vérifiez votre connexion et réessayez.");
+          }
+        });
+    };
+
+    sendEmail();
   };
 
   const fields = [
@@ -64,6 +100,12 @@ const Contact: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
 
         .scanline {
+          position: relative;
+        }
+        .scanline::after {
+          content: '';
+          position: absolute;
+          inset: 0;
           background: repeating-linear-gradient(
             0deg,
             transparent,
@@ -72,6 +114,7 @@ const Contact: React.FC = () => {
             rgba(0,255,128,0.015) 4px
           );
           pointer-events: none;
+          z-index: 10;
         }
 
         .terminal-input {
